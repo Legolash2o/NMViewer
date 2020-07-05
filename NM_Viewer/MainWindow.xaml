@@ -19,7 +19,7 @@
         </StackPanel>
 
         <ScrollViewer x:Name="svCanvas" Grid.Row="1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"  MouseMove="CCanvas_OnMouseMove" PreviewMouseWheel="SvCanvas_OnPreviewMouseWheel" MouseWheel="SvCanvas_OnPreviewMouseWheel" MouseDown="SvCanvas_OnMouseDown">
-            <Canvas x:Name="cMain" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Width="36000" Height="58000"  >
+            <Canvas x:Name="cMain" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" Width="36000" Height="58000" Background="WhiteSmoke">
                 <Canvas.RenderTransform>
                     <ScaleTransform x:Name="st"/>
                 </Canvas.RenderTransform>
