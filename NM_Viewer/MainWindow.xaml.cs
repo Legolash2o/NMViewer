@@ -37,10 +37,7 @@ namespace NM_Viewer
         public Dictionary<long, Node> Nodes = new Dictionary<long, Node>();
         public Dictionary<long, Signal> Signals = new Dictionary<long, Signal>();
         HashSet<string> WayId = new HashSet<string>();
-
-        List<string> tiplocs = new List<string>();
-        Dictionary<string, string> elocs = new Dictionary<string, string>();
-
+  
         bool drawing = true;
 
         bool showSignals = false;
@@ -104,12 +101,6 @@ namespace NM_Viewer
 
                 foreach (var node in nodes)
                 {
-                    //string validTo = node.GetValue<string>("validTo");
-                    //DateTime validToDate = DateTime.ParseExact(validTo, "yyyy-MM-dd", CultureInfo.CurrentUICulture);
-
-                    //if (validToDate < DateTime.Now)
-                    //    continue;
-
                     Node n = new Node();
                     n.Id = node.Elements().First().GetValue<long>("nodeid");
                     n.X = node.GetValue<double>("netx");
@@ -140,13 +131,7 @@ namespace NM_Viewer
                 var stations = root.Elements().Where(nn => nn.Name.LocalName == "station");
 
                 foreach (var node in stations)
-                {
-                    //string validTo = node.GetValue<string>("validTo");
-                    //DateTime validToDate = DateTime.ParseExact(validTo, "yyyy-MM-dd", CultureInfo.CurrentUICulture);
-
-                    //if (validToDate < DateTime.Now)
-                    //    continue;
-
+                {                
                     byte R = (byte)r.Next(1, 255);
                     byte G = (byte)r.Next(1, 255);
                     byte B = (byte)r.Next(1, 255);
@@ -178,21 +163,6 @@ namespace NM_Viewer
                         if (way == null)
                             continue;
 
-                        //foreach (var pnt in way.Elements().Where(nn => nn.Name.LocalName == "point"))
-                        //{
-                        //    long nodeId = pnt.GetValue<long>("nodeid");
-                        //    Station n = new Station();
-                        //    n.Name = $"{abbrev} - {stationName} ({trackName})";
-                        //    n.Id = stationId;
-                        //    n.TIPLOC = abbrev;
-
-                        //    n.R = R;
-                        //    n.G = G;
-                        //    n.B = B;
-
-                        //    Nodes[nodeId].Station = n;
-                        //}
-
                         var points = way.Elements().Where(nn => nn.Name.LocalName == "point").ToArray();
 
                         var middle = points[points.Length / 2];
@@ -201,13 +171,7 @@ namespace NM_Viewer
                         Station n = new Station();
                         n.Name = $"{abbrev}, {stationName} ({trackName})";
                         n.Id = stationId;
-                        n.TIPLOC = abbrev;
-
-                        if (!elocs.ContainsKey(n.TIPLOC) && n.TIPLOC.StartsWith("ELOC"))
-                            elocs.Add(n.TIPLOC, n.Name);
-
-                        if (!tiplocs.Contains(n.TIPLOC) && !n.TIPLOC.StartsWith("ELOC"))
-                            tiplocs.Add(n.TIPLOC);
+                        n.TIPLOC = abbrev;                   
 
                         if (!showElocs && n.TIPLOC.StartsWith("ELOC"))
                             continue;
@@ -220,32 +184,9 @@ namespace NM_Viewer
                         n.B = B;
 
                         Nodes[nodeId].Stations.Add(n);
-
-                        if (Nodes[nodeId].Stations.Count > 1)
-                        {
-                            ;
-                        }
-
                     }
                 }
             }
-
-            using (StreamWriter sw = new StreamWriter("tiplocs.csv", false))
-            {
-                foreach (var tpl in tiplocs)
-                {
-                    sw.WriteLine($"{tpl.Trim()}");
-                }
-            }
-
-            using (StreamWriter sw = new StreamWriter("elocs.csv", false))
-            {
-                foreach (var el in elocs)
-                {
-                    sw.WriteLine($"{el.Key.Trim()},\"{el.Value.Split(',')[1].Trim()}\"");
-                }
-            }
-
             {
                 var edges = root.Elements().Where(nn => nn.Name.LocalName == "edge");
                 foreach (var edge in edges)
@@ -296,15 +237,10 @@ namespace NM_Viewer
             {
                 if (showSignals)
                 {
-                    var signals = root.Elements().Where(nn => nn.Name.LocalName == "signal"); //SHOULD BE SIGNAL
+                    var signals = root.Elements().Where(nn => nn.Name.LocalName == "signal"); 
 
                     foreach (var sgn in signals)
-                    {
-                        ////string validTo = node.GetValue<string>("validTo");
-                        ////DateTime validToDate = DateTime.ParseExact(validTo, "yyyy-MM-dd", CultureInfo.CurrentUICulture);
-
-                        ////if (validToDate < DateTime.Now)
-                        ////    continue;
+                    {                    
 
                         Signal n = new Signal();
                         n.Id = sgn.GetValue<long>("signalid");
@@ -319,9 +255,6 @@ namespace NM_Viewer
                         {
                             var start = directed.Elements().FirstOrDefault(ee => ee.Name.LocalName == "start");
                             startId = start.Elements().First().GetValue<long>("nodeid");
-
-                            //var end = directed.Elements().FirstOrDefault(ee => ee.Name.LocalName == "end");
-                            //endId = end.Elements().First().GetValue<long>("nodeid");
                         }
 
                         n.NodeId = startId;
@@ -331,70 +264,7 @@ namespace NM_Viewer
                 }
             }
 
-            //TODO: Doesn't work, needs improving...
-            ////ReduceEdges
-            //var iNodes = Nodes.Where(nn => nn.Value.Intersection).ToArray();
-            // long NewWays = 0;
-            //foreach (var node in iNodes)
-            //{
-            //    foreach (var edge in node.Value.Edges)
-            //    {
-            //        long length = edge.Length;
-            //        List<long> nodeIds = new List<long>();
-            //        nodeIds.Add(node.Key);
-
-            //        var nextNode = edge.EndNode;
-
-            //        if (nextNode.Intersection)
-            //        {
-            //            nodeIds.Add(nextNode.Id);
-            //            NewWays++;
-            //            continue;
-            //        }
-
-            //        while (nextNode.Intersection != true && !nodeIds.Contains(nextNode.Id))
-            //        {
-            //            nodeIds.Add(nextNode.Id);
-            //            length += nextNode.Edges[0].Length;
-            //            nextNode = nextNode.Edges[0].EndNode;
-            //        }
-
-            //        ;
-            //    }
-
-            //}
-
-            //foreach (var track in tracks)
-            //{
-            //    string validTo = track.GetValue<string>("validTo");
-            //    DateTime validToDate = DateTime.ParseExact(validTo, "yyyy-MM-dd", CultureInfo.CurrentUICulture);
-
-            //    if (validToDate < DateTime.Now)
-            //        continue;
-
-            //    Track t = new Track();
-            //    t.Id = track.GetValue<long>("trackID");
-            //    t.Name = track.GetValue<string>("name");
-            //    t.Description = track.GetValue<string>("description");
-            //    t.Directed = track.GetValue<bool>("directed");
-            //    t.TrackCategory = track.GetValue<int>("trackcategory");
-
-            //    var way = track.Elements().FirstOrDefault(nn => nn.Name.LocalName == "way");
-
-            //    if (way != null)
-            //    {
-            //        var points = way.Elements().Where(nn => nn.Name.LocalName == "point");
-            //        foreach (var pnt in points)
-            //        {
-            //            ;
-            //        }
-            //    }
-
-            //   // Nodes.Add(n.Id, n);
-            //}
-
             UpdateStatus($"Loaded {filename}.");
-
         }
 
 
@@ -408,8 +278,6 @@ namespace NM_Viewer
             {
                 try
                 {
-
-
                     long i = 0;
                     foreach (var n in Nodes)
                     {
@@ -432,32 +300,7 @@ namespace NM_Viewer
                             line.ToolTip = $"Id: {e.Id}, Length: {e.Length}";
                             line.Stroke = Brushes.Black;
 
-                            cMain.Children.Add(line);
-
-                            //{
-                            //    Rectangle elip = new Rectangle();
-                            //    elip.Height = 5;
-                            //    elip.Width = 3;
-                            //    elip.Fill = Brushes.Black;
-                            //    elip.Stroke = Brushes.Black;
-                            //    elip.StrokeThickness = 0.5;
-                            //    Canvas.SetTop(elip, n.Value.Y - elip.Width / 2);
-                            //    Canvas.SetLeft(elip, n.Value.X - elip.Height / 2);
-                            //    cMain.Children.Add(elip);
-                            //}
-                            //{
-                            //    Rectangle elip = new Rectangle();
-                            //    elip.Height = 5;
-                            //    elip.Width = 3;
-                            //    elip.ToolTip = $" [{e.EndNode.Id}] {e.EndNode.X}, {e.EndNode.Y}";
-
-                            //    elip.Fill = Brushes.Black;
-                            //    elip.Stroke = Brushes.Black;
-                            //    elip.StrokeThickness = 0.5;
-                            //    Canvas.SetTop(elip, e.EndNode.Y - elip.Width / 2);
-                            //    Canvas.SetLeft(elip, e.EndNode.X - elip.Height / 2);
-                            //    cMain.Children.Add(elip);
-                            //}
+                            cMain.Children.Add(line);                      
                         }
 
                         i++;
@@ -494,29 +337,8 @@ namespace NM_Viewer
                             Canvas.SetTop(elip, n.Value.Y - elip.Width / 2);
                             Canvas.SetLeft(elip, n.Value.X - elip.Height / 2);
                             cMain.Children.Add(elip);
-
-
                         }
-                    }
-
-                    //lblStatus.Content = "Drawing Intersections...";
-                    //foreach (var n in Nodes)
-                    //{
-                    //    if (n.Value.Intersection)
-                    //    {
-                    //        Rectangle elip = new Rectangle();
-                    //        elip.Height = 4;
-                    //        elip.Width = 4;
-                    //        elip.ToolTip = $"{n.Value.Edges.Count} [{n.Key}] {n.Value.X}, {n.Value.Y}";
-                    //        elip.Fill = Brushes.Black;
-                    //        elip.Stroke = Brushes.Black;
-                    //        elip.StrokeThickness = 0.5;
-
-                    //        Canvas.SetTop(elip, n.Value.Y - elip.Width / 2);
-                    //        Canvas.SetLeft(elip, n.Value.X - elip.Height / 2);
-                    //        cMain.Children.Add(elip);
-                    //    }
-                    //}
+                    }                
 
                     lblStatus.Content = "Drawing Signals...";
                     foreach (var n in Signals)
